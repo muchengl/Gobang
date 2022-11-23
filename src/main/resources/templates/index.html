@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <script src="../js/jquery.js"></script>
+    <style>
+        td{
+            background-color:darkgray;
+            width: 30px;
+            height: 30px;
+            border-width: 1px;
+            border-color: black;
+            border-style: solid;
+        }
+
+    </style>
+</head>
+<body>
+
+<div style="text-align: center">
+    <h1>五子棋</h1>
+    <hr><br>
+    <table id="map" style="border-collapse:collapse;border-spacing:0;margin: auto;">
+    </table>
+    <br>
+    <button onclick="renew()" style="height: 40px;width: 100px">点击重新开始</button>
+</div>
+<script>
+    var idx=1;
+    for(var i=1;i<=15;i++){
+        $("#map").append(
+            '<tr name="'+i+'" class="hang"></tr>'
+        );
+    }
+    for(var i=1;i<=15;i++){
+        $(".hang").append(
+            '<td name="'+i+'" onclick="toBack(this)"></td>'
+        );
+    }
+</script>
+<script>
+    function toBack(x) {
+
+        var Py=x.parentNode.getAttribute("name");
+        var Px=x.getAttribute("name");
+
+        $.post({
+            url:'/getPlace',
+            dataType:'json',
+            data:{
+                x:Px,
+                y:Py
+            },
+            success:function (data) {
+                var table = $("#map").children();
+                for (var i = 0; i < table.length; i++) {
+                    if (table[i].getAttribute("name") == data.y) {
+                        // alert("sss")
+                        var tr = table[i].childNodes;
+                        for (var j = 0; j < tr.length; j++) {
+                            if (tr[j].getAttribute("name") == data.x) {
+                                tr[j].style.backgroundColor = "white";
+                            }
+                        }
+                    }
+                }
+                if(data.victory==-1){
+                    alert("非法落子");
+                }
+                else if(data.victory==1){
+                    x.style.backgroundColor="black";
+                    alert("白棋胜利");
+                }
+                else if(data.victory==2){
+                    x.style.backgroundColor="black";
+                    alert("黑棋胜利");
+                }
+                else {
+                    x.style.backgroundColor="black";
+
+                }
+            }
+        })
+
+
+    }
+</script><!--提交给后台落子位置-->
+
+<script>
+    function renew() {
+        $.post({
+            url:'/getPlace',
+            dataType:'json',
+            data:{
+                x:0,
+                y:0
+            },
+            success:function () {
+                var table = $("#map").children();
+                for (var i = 0; i < table.length; i++) {
+                    var tr = table[i].childNodes;
+                    for (var j = 0; j < tr.length; j++) {
+                        // alert(i+" "+j);
+                        tr[j].style.backgroundColor = "darkgray";
+                    }
+
+                }
+            }
+        })
+    }
+</script><!--刷新地图-->
+</body>
+</html>
